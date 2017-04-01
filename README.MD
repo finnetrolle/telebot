@@ -15,6 +15,7 @@ I hope once you can start bot and send anything to all your pals in ally or corp
 * do-not-disturb time range for users
 
 ## New in 0.5.x
+* Check and Amnesty API is secured now
 * docker-compose file
 * quests
 * amnesty for mass renegades

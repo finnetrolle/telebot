@@ -2,11 +2,11 @@ package ru.finnetrolle.telebot.restful
 
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestMethod
-import org.springframework.web.bind.annotation.ResponseBody
+import org.springframework.web.bind.annotation.*
 import ru.finnetrolle.telebot.model.Mail
 import ru.finnetrolle.telebot.service.external.MailbotService
 import ru.finnetrolle.telebot.service.internal.PilotService
@@ -26,6 +26,9 @@ class MailResource {
     @Autowired
     private lateinit var pilotService: PilotService
 
+    @Value("\${api.secret.utils}")
+    private lateinit var lSecret: String
+
     private val log = LoggerFactory.getLogger(MailResource::class.java)
 
     @RequestMapping(method = arrayOf(RequestMethod.GET))
@@ -37,7 +40,10 @@ class MailResource {
 
     @RequestMapping(method = arrayOf(RequestMethod.GET), path = arrayOf("/check"))
     @ResponseBody
-    fun check(): CheckWrapper {
+    fun check(@RequestHeader("Secret") secret: String): CheckWrapper {
+        if (!lSecret.equals(secret)) {
+            throw IllegalAccessException()
+        }
         val start = System.currentTimeMillis()
         val result = pilotService.check()
         val wrapper = CheckWrapper(System.currentTimeMillis() - start, result)
@@ -47,7 +53,10 @@ class MailResource {
 
     @RequestMapping(method = arrayOf(RequestMethod.GET), path = arrayOf("/amnesty"))
     @ResponseBody
-    fun amnesty(): CheckWrapper {
+    fun amnesty(@RequestHeader("Secret") secret: String): CheckWrapper {
+        if (!lSecret.equals(secret)) {
+            throw IllegalAccessException()
+        }
         val start = System.currentTimeMillis()
         val result = pilotService.amnesty()
         val wrapper = CheckWrapper(System.currentTimeMillis() - start, result)
@@ -57,5 +66,9 @@ class MailResource {
 
     data class AmnestyWrapper( val time: Long, val result: PilotService.CheckResult)
     data class CheckWrapper( val time: Long, val result: PilotService.CheckResult)
+
+    @ExceptionHandler(IllegalAccessException::class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    fun interceptUnauthorized() {}
 
 }

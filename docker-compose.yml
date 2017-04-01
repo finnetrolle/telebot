@@ -27,6 +27,7 @@ services:
       # secrets
       API_SECRET_CAST_GROUP=secret
       API_SECRET_CAST_GLOBAL=secret
+      API_SECRET_UTILS=secret
 
       # superuser
       TELEBOT_SUPERUSER=Your character Name
