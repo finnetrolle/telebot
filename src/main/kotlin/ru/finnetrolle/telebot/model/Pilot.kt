@@ -28,6 +28,10 @@ interface PilotRepository: Repository<Pilot, Int> {
     @Query("delete from pilots where renegade = true", nativeQuery = true)
     fun dropRenegades()
 
+    @Modifying
+    @Query("delete from pilot_options where id = ?1", nativeQuery = true)
+    fun dropPilotQuestOptions(pilotTelegramId: Int)
+
     fun findByCharacterName(name: String): Optional<Pilot>
 
     fun findByRenegadeFalse(): List<Pilot>

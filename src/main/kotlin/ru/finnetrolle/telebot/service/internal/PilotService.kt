@@ -154,8 +154,14 @@ open class PilotService {
     @Transactional
     open fun remove(name: String): Optional<Pilot> {
         return pilotRepo.findByCharacterName(name).decide({
-            pilotRepo.delete(it)
-            Optional.of(it)
+            try {
+                pilotRepo.dropPilotQuestOptions(it.id)
+                pilotRepo.delete(it)
+                Optional.of(it)
+            } catch (e: Exception) {
+                log.error("Can't remove pilot because of bug", e)
+                Optional.empty()
+            }
         },{
             Optional.empty()
         })
@@ -164,8 +170,14 @@ open class PilotService {
     @Transactional
     open fun remove(id: Int): Optional<Pilot> {
         return pilotRepo.findOne(id).decide({
-            pilotRepo.delete(it)
-            Optional.of(it)
+            try {
+                pilotRepo.dropPilotQuestOptions(it.id)
+                pilotRepo.delete(it)
+                Optional.of(it)
+            } catch (e: Exception) {
+                log.error("Can't remove pilot because of bug", e)
+                Optional.empty()
+            }
         },{
             Optional.empty()
         })
