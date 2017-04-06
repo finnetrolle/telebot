@@ -9,6 +9,7 @@ import ru.finnetrolle.telebot.model.Pilot
 import ru.finnetrolle.telebot.service.internal.PilotService
 import ru.finnetrolle.telebot.service.processing.commands.AbstractSecuredCommand
 import ru.finnetrolle.telebot.service.telegram.TelegramBotService
+import ru.finnetrolle.telebot.util.EveTime
 import ru.finnetrolle.telebot.util.MessageBuilder
 import ru.finnetrolle.telebot.util.MessageLocalization
 import java.util.*
@@ -42,7 +43,7 @@ open class GroupBroadcastCommand : AbstractSecuredCommand() {
     override fun execute(pilot: Pilot, data: String): String {
         val text = data.substringAfter(" ")
         val users = pilotService.getLegalUsers(data.substringBefore(" "))
-        val message = "Broadcast from ${pilot.characterName} at ${Date()} \n$text"
+        val message = "Broadcast from ${pilot.characterName} at ${EveTime.now()} \n$text"
         telegram.broadcast(users.map { u -> MessageBuilder.build(u.id.toString(), message) })
         castRepo.save(Broadcast(
                 fromName = pilot.characterName,
