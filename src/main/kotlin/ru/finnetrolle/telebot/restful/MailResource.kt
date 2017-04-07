@@ -38,34 +38,47 @@ class MailResource {
         return ResponseEntity.ok(mailbot.getLast())
     }
 
-    @RequestMapping(method = arrayOf(RequestMethod.GET), path = arrayOf("/check"))
+//    @RequestMapping(method = arrayOf(RequestMethod.GET), path = arrayOf("/check"))
+//    @ResponseBody
+//    fun check(@RequestHeader("Secret") secret: String): SyncWrapper {
+//        if (!lSecret.equals(secret)) {
+//            throw IllegalAccessException()
+//        }
+//        val start = System.currentTimeMillis()
+////        val result = pilotService.check()
+//        val result = pilotService.syncEveApi()
+//        val wrapper = SyncWrapper(System.currentTimeMillis() - start, result)
+//        log.info("Renegade check result: $wrapper")
+//        return wrapper
+//    }
+//
+//    @RequestMapping(method = arrayOf(RequestMethod.GET), path = arrayOf("/amnesty"))
+//    @ResponseBody
+//    fun amnesty(@RequestHeader("Secret") secret: String): SyncWrapper {
+//        if (!lSecret.equals(secret)) {
+//            throw IllegalAccessException()
+//        }
+//        val start = System.currentTimeMillis()
+////        val result = pilotService.amnesty()
+//        val result = pilotService.syncEveApi()
+//        val wrapper = SyncWrapper(System.currentTimeMillis() - start, result)
+//        log.info("Renegade amnesty result: $wrapper")
+//        return wrapper
+//    }
+
+    @RequestMapping(method = arrayOf(RequestMethod.GET), path = arrayOf("/sync"))
     @ResponseBody
-    fun check(@RequestHeader("Secret") secret: String): CheckWrapper {
-        if (!lSecret.equals(secret)) {
-            throw IllegalAccessException()
-        }
+    fun amnesty(): SyncWrapper {
         val start = System.currentTimeMillis()
-        val result = pilotService.check()
-        val wrapper = CheckWrapper(System.currentTimeMillis() - start, result)
-        log.info("Renegade check result: $wrapper")
+        val result = pilotService.syncEveApi()
+        val wrapper = SyncWrapper(System.currentTimeMillis() - start, result)
+        log.info("Sync result: $wrapper")
         return wrapper
     }
 
-    @RequestMapping(method = arrayOf(RequestMethod.GET), path = arrayOf("/amnesty"))
-    @ResponseBody
-    fun amnesty(@RequestHeader("Secret") secret: String): CheckWrapper {
-        if (!lSecret.equals(secret)) {
-            throw IllegalAccessException()
-        }
-        val start = System.currentTimeMillis()
-        val result = pilotService.amnesty()
-        val wrapper = CheckWrapper(System.currentTimeMillis() - start, result)
-        log.info("Renegade amnesty result: $wrapper")
-        return wrapper
-    }
-
-    data class AmnestyWrapper( val time: Long, val result: PilotService.CheckResult)
-    data class CheckWrapper( val time: Long, val result: PilotService.CheckResult)
+//    data class AmnestyWrapper( val time: Long, val result: PilotService.CheckResult)
+//    data class CheckWrapper( val time: Long, val result: PilotService.CheckResult)
+    data class SyncWrapper( val time: Long, val result: PilotService.SyncResult)
 
     @ExceptionHandler(IllegalAccessException::class)
     @ResponseStatus(HttpStatus.FORBIDDEN)

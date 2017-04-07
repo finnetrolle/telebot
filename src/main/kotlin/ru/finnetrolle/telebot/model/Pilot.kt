@@ -63,5 +63,6 @@ data class Pilot (
         var moderator: Boolean = false,
         var renegade: Boolean = false,
         var translateTo: String = "",
-        var speaker: Boolean = false
+        var speaker: Boolean = false,
+        var corpId: Long = 0
 )

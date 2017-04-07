@@ -79,36 +79,76 @@ open class PilotService {
     data class CheckPair(val pilot: Pilot, val character: CharacterAffiliation)
     data class CheckResult(val renegaded: List<String>, val checked: Int)
 
-    @Transactional
-    open fun check(): CheckResult {
-        val allowedAllies = allyService.getAll().map { a -> a.id }.toSet()
-        val allowedCorps = corpService.getAll().map { c -> c.id }.toSet()
-        val pilotsToCheck = pilotRepo.findByRenegadeFalse().filter { !isSuperUser(it) }
-        val afillations = eve.getAffilations(pilotsToCheck.map { it.characterId })
-        val renegades = pilotsToCheck
-                .map { CheckPair(it, afillations.getOrElse(it.characterId, {CharacterAffiliation()})) }
-                .filter { !allowedAllies.contains(it.character.allianceID) }
-                .filter { !allowedCorps.contains(it.character.corporationID) }
-        if (renegades.isNotEmpty()) {
-            pilotRepo.makeRenegades(renegades.map { it.pilot.id })
-        }
-        return CheckResult(renegades.map { it.pilot.characterName }, pilotsToCheck.size)
-    }
+//    @Transactional
+//    open fun check(): CheckResult {
+//        val allowedAllies = allyService.getAll().map { a -> a.id }.toSet()
+//        val allowedCorps = corpService.getAll().map { c -> c.id }.toSet()
+//        val pilotsToCheck = pilotRepo.findByRenegadeFalse().filter { !isSuperUser(it) }
+//        val afillations = eve.getAffilations(pilotsToCheck.map { it.characterId })
+//        val renegades = pilotsToCheck
+//                .map { CheckPair(it, afillations.getOrElse(it.characterId, {CharacterAffiliation()})) }
+//                .filter { !allowedAllies.contains(it.character.allianceID) }
+//                .filter { !allowedCorps.contains(it.character.corporationID) }
+//        if (renegades.isNotEmpty()) {
+//            pilotRepo.makeRenegades(renegades.map { it.pilot.id })
+//        }
+//        return CheckResult(renegades.map { it.pilot.characterName }, pilotsToCheck.size)
+//    }
+//
+//    @Transactional
+//    open fun amnesty(): CheckResult {
+//        val allowedAllies = allyService.getAll().map { a -> a.id }.toSet()
+//        val allowedCorps = corpService.getAll().map { c -> c.id }.toSet()
+//        val pilotsToCheck = pilotRepo.findByRenegadeTrue().filter { !isSuperUser(it) }
+//        val afillations = eve.getAffilations(pilotsToCheck.map { it.characterId })
+//        val amnestee = pilotsToCheck
+//                .map { CheckPair(it, afillations.getOrElse(it.characterId, {CharacterAffiliation()})) }
+//                .filter { allowedAllies.contains(it.character.allianceID ?: -1) || allowedCorps.contains(it.character.corporationID) }
+//        if (amnestee.isNotEmpty()) {
+//            pilotRepo.makeAmnestee(amnestee.map { it.pilot.id })
+//        }
+//        return CheckResult(amnestee.map { it.pilot.characterName }, pilotsToCheck.size)
+//    }
 
     @Transactional
-    open fun amnesty(): CheckResult {
-        val allowedAllies = allyService.getAll().map { a -> a.id }.toSet()
-        val allowedCorps = corpService.getAll().map { c -> c.id }.toSet()
-        val pilotsToCheck = pilotRepo.findByRenegadeTrue().filter { !isSuperUser(it) }
-        val afillations = eve.getAffilations(pilotsToCheck.map { it.characterId })
-        val amnestee = pilotsToCheck
-                .map { CheckPair(it, afillations.getOrElse(it.characterId, {CharacterAffiliation()})) }
-                .filter { allowedAllies.contains(it.character.allianceID ?: -1) || allowedCorps.contains(it.character.corporationID) }
-        if (amnestee.isNotEmpty()) {
-            pilotRepo.makeAmnestee(amnestee.map { it.pilot.id })
+    open fun syncEveApi(): SyncResult {
+        val allowedAllies = allyService.getAll().map { it.id }.toSet()
+        val allowedCorps = corpService.getAll().map { it.id }.toSet()
+        val pilots = pilotRepo.findAll()
+        val afillations = eve.getAffilations(pilots.map { it.characterId })
+
+        val renegaded = mutableListOf<String>()
+        val amnested = mutableListOf<String>()
+        val corpChanged = mutableListOf<String>()
+        pilots.forEach {
+            val afillation = afillations[it.characterId]
+            if (afillation != null) {
+                var mod = false
+                val renegade = !allowedAllies.contains(afillation.allianceID) && !allowedCorps.contains(afillation.corporationID)
+                if (it.renegade != renegade && !isSuperUser(it)) {
+                    mod = true
+                    it.renegade = renegade
+                    if (renegade) {
+                        renegaded.add(it.characterName)
+                    } else {
+                        amnested.add(it.characterName)
+                    }
+                }
+                if (it.corpId != afillation.corporationID) {
+                    mod = true
+                    it.corpId = afillation.corporationID
+                    corpChanged.add(it.characterName)
+                }
+                if (mod) {
+                    pilotRepo.save(pilot = it)
+                }
+            }
         }
-        return CheckResult(amnestee.map { it.pilot.characterName }, pilotsToCheck.size)
+
+        return SyncResult(renegaded, amnested, corpChanged, pilots.size)
     }
+
+    data class SyncResult(val renegaded: List<String>, val amnested: List<String>, val corpChanged: List<String>, val checked: Int)
 
     sealed class SingleCheckResult {
         class OK(val name: String, val corp: String, val ally: String) : SingleCheckResult()

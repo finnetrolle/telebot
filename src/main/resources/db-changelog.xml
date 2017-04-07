@@ -37,5 +37,9 @@
     <changeSet id="11" author="finnetrolle">
         <sqlFile path="sql/011_quests.sql" relativeToChangelogFile="true" splitStatements="true"/>
     </changeSet>
+    <changeSet id="12" author="finnetrolle">
+        <sqlFile path="sql/012_corp_broadcasting.sql" relativeToChangelogFile="true" splitStatements="true"/>
+    </changeSet>
+
 
 </databaseChangeLog>
