@@ -36,6 +36,9 @@ interface PilotRepository: Repository<Pilot, Int> {
 
     fun findByRenegadeFalse(): List<Pilot>
 
+    @Query("select * from pilots where renegade = false and corp_id = ?1", nativeQuery = true)
+    fun findCorpMates(corpId: Long): List<Pilot>
+
     fun findByRenegadeTrue(): List<Pilot>
 
     fun findByModeratorTrue(): List<Pilot>

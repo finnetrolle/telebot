@@ -110,6 +110,13 @@ open class PilotService {
 //        return CheckResult(amnestee.map { it.pilot.characterName }, pilotsToCheck.size)
 //    }
 
+    open fun getCorpMates(pilot: Pilot): List<Pilot> {
+        if (pilot.corpId == 0L) {
+            return listOf()
+        }
+        return pilotRepo.findCorpMates(pilot.corpId)
+    }
+
     @Transactional
     open fun syncEveApi(): SyncResult {
         val allowedAllies = allyService.getAll().map { it.id }.toSet()
