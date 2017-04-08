@@ -43,7 +43,7 @@ open class GroupBroadcastCommand : AbstractSecuredCommand() {
     override fun execute(pilot: Pilot, data: String): String {
         val text = data.substringAfter(" ")
         val users = pilotService.getLegalUsers(data.substringBefore(" "))
-        val message = "Broadcast from ${pilot.characterName} at ${EveTime.now()} \n$text"
+        val message = "Broadcast from ${pilot.characterName} at ${EveTime.formatted()} \n$text"
         telegram.broadcast(users.map { u -> MessageBuilder.build(u.id.toString(), message) })
         castRepo.save(Broadcast(
                 fromName = pilot.characterName,

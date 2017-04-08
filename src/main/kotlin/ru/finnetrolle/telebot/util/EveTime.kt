@@ -1,5 +1,6 @@
 package ru.finnetrolle.telebot.util
 
+import java.text.SimpleDateFormat
 import java.util.*
 
 /**
@@ -14,6 +15,10 @@ object EveTime {
         cal.time = Date()
         cal.add(Calendar.HOUR, -3)
         return cal.time
+    }
+
+    fun formatted(): String {
+        return "${SimpleDateFormat("dd.MM.yyyy HH:mm:ss").format(now())} ET"
     }
 
 }

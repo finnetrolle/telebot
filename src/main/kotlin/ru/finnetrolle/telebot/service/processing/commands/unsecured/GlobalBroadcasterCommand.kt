@@ -51,7 +51,7 @@ open class GlobalBroadcasterCommand : AbstractUnsecuredCommand() {
             return loc.getMessage("message.cast.you.not.speaker")
         }
         try {
-            val message = "Broadcast from ${pilot.characterName} at ${EveTime.now()} \n$data"
+            val message = "Broadcast from ${pilot.characterName} at ${EveTime.formatted()} \n$data"
             val users = pilotService.getLegalUsers()
             val languages = users
                     .filter { it.translateTo.isNotEmpty() }

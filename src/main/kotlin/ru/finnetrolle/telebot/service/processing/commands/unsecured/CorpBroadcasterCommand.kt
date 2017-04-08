@@ -40,7 +40,7 @@ class CorpBroadcasterCommand: AbstractUnsecuredCommand() {
             return loc.getMessage("messages.impossible")
         }
         val pilots = pilotRepo.findCorpMates(pilot.corpId)
-        val message = "Corporate broadcast from ${pilot.characterName} at ${EveTime.now()} \n$data"
+        val message = "Corporate broadcast from ${pilot.characterName} at ${EveTime.formatted()} \n$data"
         try {
             telegram.broadcast(pilots
                     .map { u -> MessageBuilder.build(u.id.toString(), message) }
