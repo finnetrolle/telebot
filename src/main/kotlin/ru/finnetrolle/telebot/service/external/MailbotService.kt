@@ -24,7 +24,7 @@ open class MailbotService {
     @Autowired lateinit private var mailRepo: MailRepository
 
     @Value("\${mailbot.keyid}")
-    private lateinit var keyId: Integer
+    private var keyId: Int = 0
 
     @Value("\${mailbot.vcode}")
     private lateinit var vCode: String
@@ -32,20 +32,30 @@ open class MailbotService {
     @Value("\${mailbot.list.id}")
     private lateinit var listId: String
 
+    @Value("\${mailbot.alive}")
+    private var alive: Boolean = false
+
+    fun isAlive() = alive
+
     private var lastId: AtomicLong = AtomicLong()
 
     @PostConstruct
     open fun init() {
-        lastId.set(mailRepo.getMaxId() ?: 0)
-        log.info("Last mail id is ${lastId.get()}")
+        if (alive) {
+            lastId.set(mailRepo.getMaxId() ?: 0)
+            log.info("Last mail id is ${lastId.get()}")
+        }
     }
 
     open fun getLast(): List<Mail> {
-        return mailRepo.findFirst3ByOrderByIdDesc()
+        return if (alive) mailRepo.findFirst3ByOrderByIdDesc() else listOf<Mail>()
     }
 
     @Transactional
     open fun receiveMail() {
+        if (!alive) {
+            return
+        }
         log.info("Receiving mail procedure")
         val mails = eve.getMailList(keyId.toInt(), vCode, listId)
                 .filter { x -> x.messageID > lastId.get() }

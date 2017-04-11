@@ -41,6 +41,7 @@ services:
       MAILBOT_KEY_ID=your key id for mail
       MAILBOT_VCODE=your vcode for mail
       MAILBOT_LIST_ID=your mailing list id
+      MAILBOT_ALIVE=false
 
       YANDEX_KEY=secret
 

@@ -10,6 +10,7 @@ This bot is a simple telegram notifier. The main goal is to deliver a system, th
 I hope once you can start bot and send anything to all your pals in ally or corporation.
 
 ## New in 0.5.x
+* You can power off mailbot
 * Check and amnesty API replaced with Sync method
 * Group broadcast has group name in title
 * Eve Time instead of MSK (broadcast description)

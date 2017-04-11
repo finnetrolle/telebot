@@ -26,16 +26,20 @@ class MailResource {
     @Autowired
     private lateinit var pilotService: PilotService
 
-    @Value("\${api.secret.utils}")
-    private lateinit var lSecret: String
+//    @Value("\${api.secret.utils}")
+//    private lateinit var lSecret: String
 
     private val log = LoggerFactory.getLogger(MailResource::class.java)
 
     @RequestMapping(method = arrayOf(RequestMethod.GET))
     @ResponseBody
     fun mail(): ResponseEntity<List<Mail>> {
-        mailbot.receiveMail()
-        return ResponseEntity.ok(mailbot.getLast())
+        if (mailbot.isAlive()) {
+            mailbot.receiveMail()
+            return ResponseEntity.ok(mailbot.getLast())
+        } else {
+            return ResponseEntity.noContent().build()
+        }
     }
 
 //    @RequestMapping(method = arrayOf(RequestMethod.GET), path = arrayOf("/check"))
