@@ -52,7 +52,7 @@ class QuestCommand : AbstractUnsecuredCommand() {
         val users = if (qc.groupName.toUpperCase() == "ALL") {
             pilotService.getLegalUsers()
         } else {
-            pilotService.getLegalUsers()
+            pilotService.getLegalUsers(qc.groupName)
         }
         val q = quest.create(pilot, qc.text, qc.options, qc.mins, qc.groupName)
         try {

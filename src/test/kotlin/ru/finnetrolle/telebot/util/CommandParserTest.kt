@@ -29,5 +29,13 @@ class CommandParserTest {
         assertEquals(1440L, CommandParser.parseQuestData("[a|b] so?").mins)
     }
 
+    @Test
+    fun karerTest() {
+        val parsed = CommandParser.parseQuestData("capitals 60 [Я застрял, нужен вывод (I'm stuck and need help)|Меня вывели, все норм (I left tower and all fine)] Вынимание, просьба ответить всех кто еще не вывел капитал из под поса в Венале.   All who still stuck under tower in Venal, please, vote.")
+        assertEquals(2, parsed.options.size)
+        assertEquals("capitals", parsed.groupName)
+        assertEquals(60L, parsed.mins)
+    }
+
 
 }
