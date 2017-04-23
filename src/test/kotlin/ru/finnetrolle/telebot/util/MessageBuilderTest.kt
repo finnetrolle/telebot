@@ -27,7 +27,7 @@ class MessageBuilderTest {
         (1..500).forEach { i -> s.append("Hello world! I'm Mike!\n") }
         assertEquals(11500, s.toString().length)
         val message = MessageBuilder.build("12345", s.toString())
-        assertEquals(3, MessageBuilder.split(message).size)
+        assertEquals(4, MessageBuilder.split(message).size)
     }
 
 }
