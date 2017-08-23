@@ -21,6 +21,12 @@
         </triggeringPolicy>
     </appender>
 
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
     <logger name="org.hibernate.type" level="INFO"/>
     <logger name="org.hibernate" level="INFO"/>
     <logger name="ru.finnetrolle.telebot" level="DEBUG"/>
@@ -28,5 +34,6 @@
 
     <root level="INFO">
         <appender-ref ref="file"/>
+        <appender-ref ref="STDOUT"/>
     </root>
 </configuration>
