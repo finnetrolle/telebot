@@ -1,7 +1,7 @@
 package ru.finnetrolle.telebot.service.telegram.api
 
 import org.telegram.telegrambots.api.methods.send.SendMessage
-import org.telegram.telegrambots.exceptions.TelegramApiException
+import org.telegram.telegrambots.TelegramApiException
 
 /**
  * Telegram bot

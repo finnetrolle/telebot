@@ -1,13 +1,12 @@
 package ru.finnetrolle.telebot.service.telegram.api
 
 import org.slf4j.LoggerFactory
-import org.telegram.telegrambots.exceptions.TelegramApiException
+import org.telegram.telegrambots.TelegramApiException
 import org.telegram.telegrambots.TelegramBotsApi
 import org.telegram.telegrambots.api.methods.send.SendMessage
 import org.telegram.telegrambots.api.objects.Message
 import org.telegram.telegrambots.api.objects.Update
 import org.telegram.telegrambots.bots.TelegramLongPollingBot
-import org.telegram.telegrambots.exceptions.TelegramApiRequestException
 import ru.finnetrolle.telebot.service.internal.PilotService
 import ru.finnetrolle.telebot.util.MessageBuilder
 import ru.finnetrolle.telebot.util.decide
@@ -77,7 +76,7 @@ open class BotApiExtender(
                         api.sendMessage(message).chatId,
                         System.currentTimeMillis() - start)
             }
-        } catch (e: TelegramApiRequestException) {
+        } catch (e: TelegramApiException) {
             if (e.apiResponse.equals(BLOCKED_BOT_MESSAGE) || e.apiResponse.equals(DEACTIVATED_BOT_MESSAGE)) {
                 log.debug("Pilot ${message.chatId} must be removed")
                 pilotService.remove(message.chatId.toInt()).decide({
