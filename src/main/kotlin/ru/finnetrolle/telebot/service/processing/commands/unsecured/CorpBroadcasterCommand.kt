@@ -29,6 +29,9 @@ class CorpBroadcasterCommand: AbstractUnsecuredCommand() {
     @Autowired
     private lateinit var pilotRepo: PilotRepository
 
+    @Autowired
+    private lateinit var eveTime: EveTime
+
     private val log = LoggerFactory.getLogger(CorpBroadcasterCommand::class.java)
 
     override fun name() = "/CORP"
@@ -40,7 +43,7 @@ class CorpBroadcasterCommand: AbstractUnsecuredCommand() {
             return loc.getMessage("messages.impossible")
         }
         val pilots = pilotRepo.findCorpMates(pilot.corpId)
-        val message = "Corporate broadcast from ${pilot.characterName} at ${EveTime.formatted()} \n$data"
+        val message = "Corporate broadcast from ${pilot.characterName} at ${eveTime.formatted()} \n$data"
         try {
             telegram.broadcast(pilots
                     .map { u -> MessageBuilder.build(u.id.toString(), message) }

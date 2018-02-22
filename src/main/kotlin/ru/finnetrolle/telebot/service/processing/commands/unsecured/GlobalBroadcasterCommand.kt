@@ -39,6 +39,9 @@ open class GlobalBroadcasterCommand : AbstractUnsecuredCommand() {
     @Autowired
     private lateinit var castRepo: BroadcastRepository
 
+    @Autowired
+    private lateinit var eveTime: EveTime
+
     private val log = LoggerFactory.getLogger(GlobalBroadcasterCommand::class.java)
 
     override fun name() = "/CAST"
@@ -51,7 +54,7 @@ open class GlobalBroadcasterCommand : AbstractUnsecuredCommand() {
             return loc.getMessage("message.cast.you.not.speaker")
         }
         try {
-            val message = "Broadcast from ${pilot.characterName} at ${EveTime.formatted()} \n$data"
+            val message = "Broadcast from ${pilot.characterName} at ${eveTime.formatted()} \n$data"
             val users = pilotService.getLegalUsers()
             val languages = users
                     .filter { it.translateTo.isNotEmpty() }

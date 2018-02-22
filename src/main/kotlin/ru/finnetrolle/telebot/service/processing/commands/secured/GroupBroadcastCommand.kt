@@ -35,6 +35,9 @@ open class GroupBroadcastCommand : AbstractSecuredCommand() {
     @Autowired
     private lateinit var castRepo: BroadcastRepository
 
+    @Autowired
+    private lateinit var eveTime: EveTime
+
     override fun name() = "/GC"
 
     override fun description() = loc.getMessage("telebot.command.description.gc")
@@ -44,7 +47,7 @@ open class GroupBroadcastCommand : AbstractSecuredCommand() {
         val text = data.substringAfter(" ")
         val groupName = data.substringBefore(" ")
         val users = pilotService.getLegalUsers(groupName)
-        val message = "Group broadcast from ${pilot.characterName} to $groupName at ${EveTime.formatted()} \n$text"
+        val message = "Group broadcast from ${pilot.characterName} to $groupName at ${eveTime.formatted()} \n$text"
         telegram.broadcast(users.map { u -> MessageBuilder.build(u.id.toString(), message) })
         castRepo.save(Broadcast(
                 fromName = pilot.characterName,
