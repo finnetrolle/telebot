@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import ru.finnetrolle.telebot.model.Corporation
 import ru.finnetrolle.telebot.model.CorporationRepository
-import ru.finnetrolle.telebot.service.external.EveApiConnector
+import ru.finnetrolle.telebot.service.external.eve.EveEsiApiConnector
 import ru.finnetrolle.telebot.util.decide
 
 /**
@@ -21,7 +21,7 @@ open class CorpService {
     private lateinit var repo: CorporationRepository
 
     @Autowired
-    private lateinit var eve: EveApiConnector
+    private lateinit var eve: EveEsiApiConnector
 
     sealed class Add {
         class Success(val corporation: Corporation) : Add()
@@ -40,7 +40,7 @@ open class CorpService {
         if (corp == null) {
             return Add.NotExist(id)
         } else {
-            return Add.Success(repo.save(Corporation(corp.corporationID, corp.ticker, corp.corporationName)))
+            return Add.Success(repo.save(Corporation(id, corp.ticker, corp.name)))
         }
 
     }

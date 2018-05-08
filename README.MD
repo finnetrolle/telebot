@@ -1,6 +1,6 @@
 # Telebot
 
-0.5.7 beta 
+0.6.0 beta
 [![Build Status](https://travis-ci.org/finnetrolle/telebot.svg?branch=master)](https://travis-ci.org/finnetrolle/telebot)
 [![codecov](https://codecov.io/gh/finnetrolle/telebot/branch/master/graph/badge.svg)](https://codecov.io/gh/finnetrolle/telebot)
 [![](https://images.microbadger.com/badges/image/finnetrolle/telebot.svg)](https://microbadger.com/images/finnetrolle/telebot "Get your own image badge on microbadger.com") 
@@ -8,6 +8,10 @@
 ## What is it?
 This bot is a simple telegram notifier. The main goal is to deliver a system, that can replace jabber.
 I hope once you can start bot and send anything to all your pals in ally or corporation.
+
+## New in 0.6.x
+* Mail service is removed
+* EVE XML API is replaced via ESI
 
 ## New in 0.5.x
 * You can power off mailbot

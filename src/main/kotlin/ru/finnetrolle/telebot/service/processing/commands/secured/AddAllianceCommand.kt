@@ -27,11 +27,15 @@ class AddAllianceCommand : AbstractSecuredCommand() {
     override fun description() = loc.getMessage("telebot.command.description.addally")
 
     override fun execute(pilot: Pilot, data: String): String {
-        val result = allyService.add(data)
-        return when (result) {
-            is AllyService.Add.Success -> loc.getMessage("messages.ally.added", result.alliance.title)
-            is AllyService.Add.AlreadyExists -> loc.getMessage("messages.ally.in.list")
-            is AllyService.Add.NotFound -> loc.getMessage("messages.ally.not.exist")
+        return try {
+            val result = allyService.add(data.toLong())
+            when (result) {
+                is AllyService.Add.Success -> loc.getMessage("messages.ally.added", result.alliance.title)
+                is AllyService.Add.AlreadyExists -> loc.getMessage("messages.ally.in.list")
+                is AllyService.Add.NotFound -> loc.getMessage("messages.ally.not.exist")
+            }
+        } catch (e: NumberFormatException) {
+            loc.getMessage("messages.ally.id.required")
         }
     }
 
