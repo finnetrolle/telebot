@@ -23,9 +23,6 @@ import javax.validation.Validation
 @Controller
 class BroadcastResource {
 
-//    @Autowired
-//    private lateinit var cmd: ListUsersCommand
-
     @Autowired
     private lateinit var globalCaster: GlobalBroadcasterCommand
 
@@ -64,12 +61,6 @@ class BroadcastResource {
         validate(message)?.let { return it }
         return ResponseEntity.ok(groupCaster.execute(Pilot(characterName = message.from), "${message.group} ${message.text}"))
     }
-
-//    @RequestMapping(value = "/lu", method = arrayOf(RequestMethod.GET))
-//    @ResponseBody
-//    fun lu(): ResponseEntity<String> {
-//        return ResponseEntity.ok(cmd.execute(Pilot(moderator = true), ""))
-//    }
 
     private fun validate(input: In): ResponseEntity<String>? {
         val constraints = Validation.buildDefaultValidatorFactory().validator!!.validate(input)

@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import ru.finnetrolle.telebot.model.Alliance
 import ru.finnetrolle.telebot.model.AllianceRepository
-import ru.finnetrolle.telebot.service.external.EveApiConnector
+import ru.finnetrolle.telebot.service.external.eve.EveEsiApiConnector
 import ru.finnetrolle.telebot.util.decide
 
 /**
@@ -21,26 +21,25 @@ open class AllyService {
     private lateinit var repo: AllianceRepository
 
     @Autowired
-    private lateinit var eve: EveApiConnector
+    private lateinit var eve: EveEsiApiConnector
 
     sealed class Add {
         class Success(val alliance: Alliance) : Add()
         class AlreadyExists(val alliance: Alliance) : Add()
-        class NotFound(val ticker: String) : Add()
+        class NotFound(val ticker: Long) : Add()
     }
 
     @Transactional
-    open fun add(ticker: String): Add {
-        val exists = repo.findByTicker(ticker)
+    open fun add(id: Long): Add {
+        val exists = repo.findOne(id)
         if (exists.isPresent) {
             return Add.AlreadyExists(exists.get())
         }
-
-        val ally = eve.getAlliance(ticker)
+        val ally = eve.getAlliance(id)
         return if (ally == null) {
-            Add.NotFound(ticker)
+            Add.NotFound(id)
         } else {
-            Add.Success(repo.save(Alliance(ally.allianceID, ally.shortName, ally.name)))
+            Add.Success(repo.save(Alliance(id, ally.ticker, ally.name)))
         }
     }
 

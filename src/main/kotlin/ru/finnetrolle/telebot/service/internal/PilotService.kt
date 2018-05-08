@@ -1,7 +1,6 @@
 package ru.finnetrolle.telebot.service.internal
 
 import com.beimin.eveapi.model.eve.CharacterAffiliation
-import com.beimin.eveapi.response.eve.CharacterInfoResponse
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -10,8 +9,9 @@ import org.springframework.transaction.annotation.Transactional
 import org.telegram.telegrambots.api.objects.User
 import ru.finnetrolle.telebot.model.Pilot
 import ru.finnetrolle.telebot.model.PilotRepository
-import ru.finnetrolle.telebot.service.external.EveApiConnector
 import ru.finnetrolle.telebot.service.external.ExternalGroupProvider
+import ru.finnetrolle.telebot.service.external.eve.EveEsiApi
+import ru.finnetrolle.telebot.service.external.eve.EveEsiApiConnector
 import ru.finnetrolle.telebot.util.EveApiUnknownException
 import ru.finnetrolle.telebot.util.decide
 import java.util.*
@@ -29,7 +29,7 @@ open class PilotService {
     @Autowired lateinit private var pilotRepo: PilotRepository
     @Autowired lateinit private var allyService: AllyService
     @Autowired lateinit private var corpService: CorpService
-    @Autowired lateinit private var eve: EveApiConnector
+    @Autowired lateinit private var eve: EveEsiApiConnector
     @Autowired lateinit private var groups: ExternalGroupProvider
 
     @Value("\${telebot.superuser}")
@@ -122,7 +122,7 @@ open class PilotService {
         val allowedAllies = allyService.getAll().map { it.id }.toSet()
         val allowedCorps = corpService.getAll().map { it.id }.toSet()
         val pilots = pilotRepo.findAll()
-        val afillations = eve.getAffilations(pilots.map { it.characterId })
+        val afillations = eve.getAffiliations(pilots.map { it.characterId }.toSet())
 
         val renegaded = mutableListOf<String>()
         val amnested = mutableListOf<String>()
@@ -131,7 +131,7 @@ open class PilotService {
             val afillation = afillations[it.characterId]
             if (afillation != null) {
                 var mod = false
-                val renegade = !allowedAllies.contains(afillation.allianceID) && !allowedCorps.contains(afillation.corporationID)
+                val renegade = !allowedAllies.contains(afillation.alliance_id) && !allowedCorps.contains(afillation.corporation_id)
                 if (it.renegade != renegade && !isSuperUser(it)) {
                     mod = true
                     it.renegade = renegade
@@ -141,9 +141,9 @@ open class PilotService {
                         amnested.add(it.characterName)
                     }
                 }
-                if (it.corpId != afillation.corporationID) {
+                if (it.corpId != afillation.corporation_id) {
                     mod = true
-                    it.corpId = afillation.corporationID
+                    it.corpId = afillation.corporation_id
                     corpChanged.add(it.characterName)
                 }
                 if (mod) {
@@ -164,18 +164,18 @@ open class PilotService {
 
     open fun singleCheck(characterId: Long): SingleCheckResult {
         log.info("Checking id = $characterId")
-        eve.getCharacter(characterId)?.let {
-            if (it.characterName == null) {
-                log.error("Character with id = $characterId have null cahracter name. " +
-                        "Also his id from system is ${it.characterID}")
-                throw EveApiUnknownException()
-            }
-            if (allyService.get(it.allianceID ?: -1L).isPresent || corpService.get(it.corporationID).isPresent) {
-                return SingleCheckResult.OK(it.characterName, it.corporation, it.alliance ?: "")
+        eve.getAffiliations(setOf(characterId))[characterId]?.let {
+            val char = eve.getCharacter(characterId) ?: EveEsiApi.Character(0L, "", 0L, 0L, "", "", "", 0)
+            val ally = if (it.alliance_id != 0L) eve.getAlliance(it.alliance_id)!!.name else ""
+            val corp = eve.getCorporation(it.corporation_id)!!.name
+            if (allyService.get(it.alliance_id).isPresent ||
+                corpService.get(it.corporation_id).isPresent) {
+                SingleCheckResult.OK(char.name, corp, ally)
             } else {
-                return SingleCheckResult.Renegade(it.characterName, it.corporation, it.alliance ?: "")
+                SingleCheckResult.Renegade(char.name, corp, ally )
             }
         }
+        throw EveApiUnknownException() // external system not answering
     }
 
     @Transactional
